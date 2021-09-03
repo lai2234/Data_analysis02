@@ -1,0 +1,43 @@
+# Imort all datasets
+import pandas
+import numpy as np
+import os
+import matplotlib.pyplot as plt
+%matplotlib inline
+requests = pandas.read_csv('_311requests.csv')
+income = pandas.read_csv('WardIncome.csv')
+
+#Research Question: Is there an association between average or median household income and the number of Parking Enforcement service requests?
+
+#subset 311 request
+pkenf = requests.loc[requests['SERVICECODEDESCRIPTION']=='Parking Enforcement']
+
+#aggregate
+reqward = pkenf[['WARD','SERVICETYPECODEDESCRIPTION']].groupby(['WARD']).agg('count')
+#resetting the index
+reqward = reqward.reset_index()
+reqward.columns = ["Ward","Number of Parking Enforcement Requests for Each Ward"]
+
+#merging
+ndf = pandas.merge(income,reqward,how='inner',on=['Ward'],suffixes=['req','inc'])
+
+#relationship graph between Mean income and number of parking enforcement requests for each ward
+plt.scatter(ndf["MeanHHincome"],ndf["Number of Parking Enforcement Requests for Each Ward"])
+plt.title("Mean Household Income over Number of Parking Enforcement Requests")
+plt.xlabel("Mean Household income")
+plt.ylabel("Number of Parking Enforcement Requests")
+
+# As we see through the graph, people who make less than $60k average per year are less likely to get parking ticket.
+# We can also see the maximum number of parking enforcement requests are the people who make $120k average income.
+# To conclude, I do not see the association between the parking enforcement requests and mean household income.
+# I personally believe it is based on individual's driving behavior and not upon the amount of mean household income. 
+
+#relationship graph between Median income and number of parking enforcement requests for each ward
+plt.scatter(ndf["MedianHHincome"],ndf["Number of Parking Enforcement Requests for Each Ward"])
+plt.title("Median Household Income over Number of Parking Enforcement Requests")
+plt.xlabel("Median Household income")
+plt.ylabel("Number of Parking Enforcement Requests")
+
+# As we see in the scatter plot, the median household income that are below 40k are less likely to get parking ticket.
+# The maximum number of parking enforcement requests are the household who make nearly $90k median
+# To conclude, there is no association between the parking enforcemenet requests and median household income.
